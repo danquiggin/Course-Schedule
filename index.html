@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weekly Schedule</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+  }
+  th {
+    background-color: #f2f2f2;
+  }
+  .time-column {
+    width: 150px;
+    background-color: #f9f9f9;
+  }
+  td {
+    vertical-align: top;  /* Ensure events align to the top of the cell */
+    background-color: #f2f2f2;
+  }
+  .event {
+    padding: 5px;
+    border-radius: 5px;
+    border: 2px solid #333;  /* Border around each event bubble */
+    color: white;  /* Optional: Set text color to white for better contrast */
+    margin-bottom: 5px;  /* Add space between multiple events in the same time slot */
+  }
+
+  /* Different background colors for event bubbles based on Year value */
+  .event-year-1 {
+    background-color: #2ec414;  /* Set the color for Year 1 */
+  }
+
+  .event-default {
+    background-color: #6495ED;  /* Default color for other events */
+  }
+</style>
+
+
+</head>
+<body>
+  <h1>Weekly Schedule</h1>
+  <table>
+    <thead>
+      <tr>
+        <th class="time-column">Time</th>
+        <th>Monday</th>
+        <th>Tuesday</th>
+        <th>Wednesday</th>
+        <th>Thursday</th>
+        <th>Friday</th>
+      </tr>
+    </thead>
+    <tbody id="schedule-body">
+      <!-- Event rows will be populated by JavaScript -->
+    </tbody>
+  </table>
+
+  <script src="events.js"></script> <!-- Load the events.js file -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      displaySchedule(events);  // Call function to display the schedule
+    });
+
+    function displaySchedule(events) {
+      const scheduleBody = document.getElementById('schedule-body');
+
+      // Step 1: Collect unique start times from events
+      const timeSlots = Array.from(new Set(events.map(event => event.startTime)))
+        .sort((a, b) => {
+          // Convert times to 24-hour format to correctly sort them
+          return convertTo24HourFormat(a) - convertTo24HourFormat(b);
+        });
+
+      // Step 2: Loop through each time slot to create a row
+      timeSlots.forEach(timeSlot => {
+        const row = document.createElement('tr');
+        const timeCell = document.createElement('td');
+        timeCell.textContent = timeSlot;
+        timeCell.classList.add('time-column');
+        row.appendChild(timeCell);
+
+        // Step 3: Loop through each day (Monday to Friday) and create a cell for each
+        for (let day = 1; day <= 5; day++) {
+          const dayCell = document.createElement('td');
+          dayCell.classList.add('event');
+
+          // Step 4: Check if there are any events during this time slot for the day
+          events.forEach(event => {
+            if (event.startTime === timeSlot && event.daysOfWeek.includes(day)) {
+              const eventDiv = document.createElement('div');
+              eventDiv.classList.add('event');
+              // Check if the "Year" is 1 and apply the appropriate class
+              if (event.extendedProps.year && event.extendedProps.year.toString().includes("1")) {
+                eventDiv.classList.add('event-year-1');
+              } else {
+                eventDiv.classList.add('event-default');
+              }
+              eventDiv.innerHTML = `${event.title}<br>${event.extendedProps.instructor}<br>Room: ${event.extendedProps.room}: <br>${event.startTime}:${event.endTime}`;
+              dayCell.appendChild(eventDiv);
+            }
+          });
+
+          row.appendChild(dayCell);
+        }
+
+        scheduleBody.appendChild(row);
+      });
+    }
+
+    // Function to convert 12-hour format to 24-hour format for sorting
+    function convertTo24HourFormat(timeStr) {
+      const [time, modifier] = timeStr.split(' ');
+      let [hour, minute] = time.split(':').map(Number);
+
+      if (modifier === 'PM' && hour !== 12) {
+        hour += 12;
+      } else if (modifier === 'AM' && hour === 12) {
+        hour = 0;
+      }
+
+      return hour * 100 + minute; // Return as a sortable integer (HHMM)
+    }
+  </script>
+</body>
+</html>
