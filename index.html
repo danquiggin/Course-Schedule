@@ -106,7 +106,7 @@
               } else {
                 eventDiv.classList.add('event-default');
               }
-              eventDiv.innerHTML = `${event.title}<br>${event.extendedProps.instructor}<br>Room: ${event.extendedProps.room}: <br>${event.startTime}:${event.endTime}`;
+              eventDiv.innerHTML = `${event.coursenumber}{event.title}<br>${event.extendedProps.instructor}<br>Room: ${event.extendedProps.room}: <br>${event.startTime}:${event.endTime}`;
               dayCell.appendChild(eventDiv);
             }
           });
