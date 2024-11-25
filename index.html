@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Weekly Schedule</title>
-<style>
+  <title>GSU College of Law Weekly Schedule Spring 2025</title>
+  <style>
   body {
     font-family: Arial, sans-serif;
   }
   table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
   }
   th, td {
     padding: 10px;
@@ -44,13 +45,22 @@
   .event-default {
     background-color: #6495ED;  /* Default color for other events */
   }
+  h1 {text-align: center;}
 </style>
-
-
 </head>
+
 <body>
   <h1>GSU College of Law Weekly Schedule Spring 2025</h1>
+
   <table>
+    <colgroup>
+    <col style="width: 10%">
+    <col style="width: 18%">
+    <col style="width: 18%">
+    <col style="width: 18%">
+    <col style="width: 18%">
+    <col style="width: 18%">
+  </colgroup>
     <thead>
       <tr>
         <th class="time-column">Time</th>
@@ -66,23 +76,44 @@
     </tbody>
   </table>
 
-  <script src="events.js"></script> <!-- Load the events.js file -->
+  <table class="tags">
+    <tbody>
+    <tr>F2F: Face to Face<br> B: Blended<br> OS: Online Synchronous<br> WR: Satisfies Writing Requirement</tr>
+    </tbody>
+  </table>
+
+
+  <h2>Online Classes</h2>
+  <table class="online-classes-table">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Instructor</th>
+        <th>Capacity</th>
+        <th>Start Time</th>
+        <th>End Time</th>
+      </tr>
+    </thead>
+    <tbody id="online-classes-body">
+      <!-- Online classes will be populated by JavaScript -->
+    </tbody>
+  </table>
+
+  <!-- Load events.js containing scheduleData -->
+  <script src="events.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      displaySchedule(events);  // Call function to display the schedule
-    });
+      const events = scheduleData.events;
+      const onlineClasses = scheduleData.online_classes;
 
-    function displaySchedule(events) {
+      // Step 1: Populate the weekly schedule
       const scheduleBody = document.getElementById('schedule-body');
 
-      // Step 1: Collect unique start times from events
+      // Collect unique start times from events
       const timeSlots = Array.from(new Set(events.map(event => event.startTime)))
-        .sort((a, b) => {
-          // Convert times to 24-hour format to correctly sort them
-          return convertTo24HourFormat(a) - convertTo24HourFormat(b);
-        });
+        .sort((a, b) => convertTo24HourFormat(a) - convertTo24HourFormat(b));
 
-      // Step 2: Loop through each time slot to create a row
+      // Loop through each time slot to create a row
       timeSlots.forEach(timeSlot => {
         const row = document.createElement('tr');
         const timeCell = document.createElement('td');
@@ -90,23 +121,26 @@
         timeCell.classList.add('time-column');
         row.appendChild(timeCell);
 
-        // Step 3: Loop through each day (Monday to Friday) and create a cell for each
+        // Loop through each day (Monday to Friday) and create a cell for each
         for (let day = 1; day <= 5; day++) {
           const dayCell = document.createElement('td');
           dayCell.classList.add('event');
 
-          // Step 4: Check if there are any events during this time slot for the day
+          // Check if there are any events during this time slot for the day
           events.forEach(event => {
             if (event.startTime === timeSlot && event.daysOfWeek.includes(day)) {
               const eventDiv = document.createElement('div');
               eventDiv.classList.add('event');
+
               // Check if the "Year" is 1 and apply the appropriate class
               if (event.extendedProps.year && event.extendedProps.year.toString().includes("1")) {
                 eventDiv.classList.add('event-year-1');
               } else {
                 eventDiv.classList.add('event-default');
               }
-              eventDiv.innerHTML = `${event.title}<br>${event.extendedProps.instructor}<br>Room: ${event.extendedProps.room} <br>${event.startTime}:${event.endTime}<br>${event.extendedProps.modality}`;
+
+              // Populate the event details
+              eventDiv.innerHTML = `${event.title}<br><br>${event.extendedProps.instructor}<br><br>Room: ${event.extendedProps.room} <br>${event.startTime}:${event.endTime}<br>${event.extendedProps.modality}`;
               dayCell.appendChild(eventDiv);
             }
           });
@@ -116,7 +150,21 @@
 
         scheduleBody.appendChild(row);
       });
-    }
+
+      // Step 2: Populate online classes
+      const onlineClassesBody = document.getElementById('online-classes-body');
+      onlineClasses.forEach(onlineClass => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${onlineClass.title}</td>
+          <td>${onlineClass.extendedProps.instructor}</td>
+          <td>${onlineClass.extendedProps.capacity}</td>
+          <td>${onlineClass.startTime}</td>
+          <td>${onlineClass.endTime}</td>
+        `;
+        onlineClassesBody.appendChild(row);
+      });
+    });
 
     // Function to convert 12-hour format to 24-hour format for sorting
     function convertTo24HourFormat(timeStr) {
@@ -129,7 +177,7 @@
         hour = 0;
       }
 
-      return hour * 100 + minute; // Return as a sortable integer (HHMM)
+      return hour * 100 + minute;
     }
   </script>
 </body>
